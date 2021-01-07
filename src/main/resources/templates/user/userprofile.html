@@ -1,6 +1,8 @@
 <!DOCTYPE HTML>
 <html xmlns:th="https://www.thymeleaf.org">
-<head th:replace="fragments/head :: head">
+<head>
+    <div th:replace="fragments/head :: head"></div>
+    <title>Your Finances - User Profile</title>
 </head>
 <body>
 
@@ -12,13 +14,19 @@
 
         <p th:text="'username: ' + ${user.name}"/>
         <p th:text="'Email: ' + ${user.email}"/>
+
         <div class="cash" th:if="${cashList!=null}">
             <h2>Мои финансы</h2>
 
             <ul class="list-group">
                 <li class="list-group-item d-flex justify-content-between align-items-center"
                     th:each="cash : ${cashList}">
-                    <span th:text="${cash.name}">Новый кошелек</span>
+                    <div>
+                        <span th:text="${cash.name}">Новый кошелек</span>
+                        <a data-method="post" href="/cash/delete" th:href="@{/cash/delete/}+${cash.id}">
+                            <span class="material-icons">delete_outline</span>
+                        </a>
+                    </div>
                     <span class="badge badge-primary badge-pill"
                           th:text="${cash.amount} +' ' + ${cash.currency.name}">14</span>
                 </li>
@@ -28,10 +36,35 @@
 
     </div>
 </div>
+<script>
+    $(document).ready(function(){
+        var token = $("meta[name='_csrf']").attr("content");
+        var header = $("meta[name='_csrf_header']").attr("content");
 
+        $("a[data-method='post']").bind('click', function(e) {
+           e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: e.currentTarget.getAttribute('href'),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                beforeSend: function(xhr) {
+                    // here it is
+                    xhr.setRequestHeader(header, token);
+                },
+                success: function (response) {
+                   alert(response.d);
+                },
+                error: function (error) {
+                  alert();
+                }
+            });
+        })
+    })
 
+</script>
 <div th:replace="fragments/footer :: footer">&copy; 2016 The Static Templates</div>
-<script th:src="@{~/webjars/jquery/3.5.1/jquery.min.js}"></script>
+<!--<script th:src="@{~/webjars/jquery/3.5.1/jquery.min.js}"></script>-->
 <script th:src="@{~/webjars/bootstrap/4.5.3/js/bootstrap.min.js}"></script>
 </body>
 </html>

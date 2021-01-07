@@ -10,6 +10,7 @@ import ru.klaus42.mysqldemo.components.EmailValid;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
+import java.util.List;
 import java.util.Set;
 
 @NoArgsConstructor
@@ -47,6 +48,6 @@ public class User {
     private UserProfile profile;
 
     @OneToMany(mappedBy="user")
-    private Set<Cash> cash;
+    private List<Cash> cash;
 
 }

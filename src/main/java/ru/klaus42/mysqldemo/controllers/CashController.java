@@ -15,8 +15,10 @@ import ru.klaus42.mysqldemo.repository.CurrencyRepository;
 import ru.klaus42.mysqldemo.repository.UserRepository;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.SortedSet;
 
 @Controller
 public class CashController {
@@ -36,10 +38,13 @@ public class CashController {
     public String getUserProfile(Model model, Authentication authentication) {
 
         User user = userRepository.findByUsername(authentication.getName());
-        Set<Cash> cashList = user.getCash();
+        List<Cash> cashList = user.getCash();
+
         Cash newCash = new Cash();
 
-        List<Currency> currencyList = currencyRepository.findAllByOrderByDisplayNameAsc();
+//        List<Currency> currencyList = currencyRepository.findAllByOrderByDisplayNameAsc();
+        List<Currency> currencyList = new ArrayList<>();
+
 
         if (user == null) return "notfound";
 
@@ -52,7 +57,7 @@ public class CashController {
     }
 
     @PostMapping("/cash")
-    public String userSubmit(@Valid Cash cash, Errors errors, Model model, Authentication authentication) {
+    public String cashSubmit(@Valid Cash cash, Errors errors, Model model, Authentication authentication) {
 
         User user = userRepository.findByUsername(authentication.getName());
 
@@ -69,6 +74,8 @@ public class CashController {
             return "redirect:user/cash";
         }
     }
+
+
 
 
 }
