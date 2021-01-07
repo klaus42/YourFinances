@@ -12,6 +12,6 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
     User findByEmail(String email);
 
-    @Query("select u from User u where u.email = ?1")
+    @Query("select u from User u where u.email = ?1 or u.name=?1")
     User findByUsername(String username);
 }

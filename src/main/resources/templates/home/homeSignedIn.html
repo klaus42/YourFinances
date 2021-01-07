@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head th:replace="fragments/head :: head">
+</head>
+<body>
+<div class="wrap">
+    <div th:replace="fragments/header :: header">
+    </div>
+
+    <div class="container">
+        <div class="hero-unit">
+            <h1>Your Finances</h1>
+            <p>
+                Let start control Your Finances!
+            </p>
+            <p>
+                <a href="/signup" th:href="@{/signup}" class="btn btn-large btn-success">Sign up</a>
+            </p>
+        </div>
+
+    </div>
+</div>
+<div th:replace="fragments/footer :: footer">&copy; 2016 The Static Templates</div>
+<script th:src="@{~/webjars/jquery/3.5.1/jquery.min.js}"></script>
+<!--<script th:src="@{/webjars/popper.js/umd/popper.min.js}"></script>-->
+<script th:src="@{~/webjars/bootstrap/4.5.3/js/bootstrap.min.js}"></script>
+</body>
+</html>

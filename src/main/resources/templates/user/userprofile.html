@@ -1,13 +1,35 @@
 <!DOCTYPE HTML>
 <html xmlns:th="https://www.thymeleaf.org">
-<head>
-    <title>User profile</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<head th:replace="fragments/head :: head">
 </head>
 <body>
-<h1>Result</h1>
 
-<p th:text="'username: ' + ${user.name}" />
-<a href="/signup">Submit another user</a>
+<div class="wrap">
+    <div th:replace="fragments/header :: header">
+    </div>
+    <div class="container">
+        <h3>Профиль пользователя</h3>
+
+        <p th:text="'username: ' + ${user.name}"/>
+        <p th:text="'Email: ' + ${user.email}"/>
+        <div class="cash" th:if="${cashList!=null}">
+            <h2>Деньги</h2>
+
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center"
+                    th:each="cash : ${cashList}">
+                    <span th:text="${cash.name}">Новый кошелек</span>
+                    <span class="badge badge-primary badge-pill"
+                          th:text="${cash.amount} +' ' + ${cash.currency}">14</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<div th:replace="fragments/footer :: footer">&copy; 2016 The Static Templates</div>
+<script th:src="@{~/webjars/jquery/3.5.1/jquery.min.js}"></script>
+<script th:src="@{~/webjars/bootstrap/4.5.3/js/bootstrap.min.js}"></script>
 </body>
 </html>

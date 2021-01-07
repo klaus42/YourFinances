@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    ...
+</head>
+<body>
+<div th:fragment="footer" class="footer">
+    <div class="container">
+        &copy; <span th:text="${#dates.format(#dates.createNow(), 'yyyy')}"></span> K1@υ$
+    </div>
+</div>
+</body>
+</html>

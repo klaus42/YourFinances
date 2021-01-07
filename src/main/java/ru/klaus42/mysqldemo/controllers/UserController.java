@@ -1,11 +1,13 @@
 package ru.klaus42.mysqldemo.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 
 import org.springframework.web.bind.annotation.GetMapping;
 
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.validation.Errors;
 
@@ -24,7 +26,15 @@ public class UserController {
     private UserRepository userRepository;
 
     @GetMapping("/signup")
-    public String signupForm(Model model) {
+    public String signupForm(Model model, Authentication authentication) {
+        if (authentication != null) {
+            User user = userRepository.findByUsername(authentication.getName());
+            if (user != null) {
+//                model.addAttribute("user",user);
+                return "redirect:user";
+            }
+        }
+
         model.addAttribute("user", new User());
         return "user/signupform";
     }
@@ -45,18 +55,19 @@ public class UserController {
             model.addAttribute("successMsg", "Details saved successfully!!");
             return "user/userprofile";
         }
-//
-//        model.addAttribute("user", user);
-//        return "user/userprofile";
     }
 
-//    @PostMapping("/join")
-//    public String userJoin(@Valid SignUpForm signUpForm,Model model,Errors errors){
-//        if (null != errors && errors.getErrorCount() > 0) {
-//            return "user/signupform";
-//        } else {
-//            return "user/userprofile";
-//        }
-//    }
+    @GetMapping("/user")
+    public String getUserProfile(Model model, Authentication authentication) {
+        User user = userRepository.findByUsername(authentication.getName());
+
+        //User user = userRepository.findById(user_id).orElse(null);
+
+        if (user == null) return "notfound";
+
+        model.addAttribute("user", user);
+        return "user/userprofile";
+    }
+
 
 }
