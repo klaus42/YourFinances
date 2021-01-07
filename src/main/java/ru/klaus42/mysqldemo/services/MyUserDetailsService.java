@@ -26,8 +26,6 @@ public class MyUserDetailsService implements UserDetailsService {
         }
 
         try {
-
-
             UserDetails user = org.springframework.security.core.userdetails.User.builder()
                     .username(myUser.getName())
                     .password(myUser.getPassword())

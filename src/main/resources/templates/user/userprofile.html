@@ -13,17 +13,19 @@
         <p th:text="'username: ' + ${user.name}"/>
         <p th:text="'Email: ' + ${user.email}"/>
         <div class="cash" th:if="${cashList!=null}">
-            <h2>Деньги</h2>
+            <h2>Мои финансы</h2>
 
             <ul class="list-group">
                 <li class="list-group-item d-flex justify-content-between align-items-center"
                     th:each="cash : ${cashList}">
                     <span th:text="${cash.name}">Новый кошелек</span>
                     <span class="badge badge-primary badge-pill"
-                          th:text="${cash.amount} +' ' + ${cash.currency}">14</span>
+                          th:text="${cash.amount} +' ' + ${cash.currency.name}">14</span>
                 </li>
             </ul>
+            <div class="cash-form" th:replace="user/fragments/newcashform :: newcashform"></div>
         </div>
+
     </div>
 </div>
 

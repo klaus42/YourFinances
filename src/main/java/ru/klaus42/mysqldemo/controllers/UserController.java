@@ -4,15 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-
 import org.springframework.web.bind.annotation.GetMapping;
-
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.validation.Errors;
 
 import ru.klaus42.mysqldemo.entity.User;
-
 import ru.klaus42.mysqldemo.repository.UserRepository;
 
 import javax.validation.Valid;
@@ -30,7 +26,6 @@ public class UserController {
         if (authentication != null) {
             User user = userRepository.findByUsername(authentication.getName());
             if (user != null) {
-//                model.addAttribute("user",user);
                 return "redirect:user";
             }
         }
@@ -44,13 +39,10 @@ public class UserController {
         if (null != errors && errors.getErrorCount() > 0) {
             return "user/signupform";
         } else {
-            User n = new User();
-            n.setName(user.getName());
-            n.setEmail(user.getEmail());
-            if (userRepository.findByEmail(n.getEmail()) != null) {
+            if (userRepository.findByEmail(user.getEmail()) != null) {
                 return "user/signupform";
             }
-            userRepository.save(n);
+            userRepository.save(user);
 
             model.addAttribute("successMsg", "Details saved successfully!!");
             return "user/userprofile";
@@ -60,8 +52,6 @@ public class UserController {
     @GetMapping("/user")
     public String getUserProfile(Model model, Authentication authentication) {
         User user = userRepository.findByUsername(authentication.getName());
-
-        //User user = userRepository.findById(user_id).orElse(null);
 
         if (user == null) return "notfound";
 

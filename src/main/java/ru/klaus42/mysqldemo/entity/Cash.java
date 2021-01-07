@@ -8,6 +8,8 @@ import org.hibernate.validator.constraints.Length;
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 
 @NoArgsConstructor
@@ -22,8 +24,9 @@ public class Cash {
 
     private String name;
 
-    @Column(length=3)
-    private String currency;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="currency", nullable=false)
+    private Currency currency;
 
     private Integer amount = 0;
 

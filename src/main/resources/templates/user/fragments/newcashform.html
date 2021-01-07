@@ -1,0 +1,28 @@
+<div class="cash-form" th:fragment="newcashform">
+    <h1>Новый кошелек/заначка/счет</h1>
+    <form action="#" th:action="@{/cash}" th:object="${cash}" method="post">
+        <div class="form-group">
+            <label for="name">Наименование кошелька/счета/вклада:</label>
+            <input autocomplete="off" type="text" class="form-control" id="name" th:field="*{name}">
+            <p class="alert alert-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">
+        </div>
+        <div class="form-group">
+            <label for="currency">Валюта:</label>
+<!--            <input autocomplete="off" type="text" class="form-control" id="currency" th:field="*{currency.name}">-->
+<!--            <p class="alert alert-danger" th:if="${#fields.hasErrors('currency.name')}" th:errors="*{currency.name}">-->
+
+            <select th:field="*{currency.name}" class="form-control">
+                <option th:each="currency: ${currency}" th:value="${currency.name}" th:text="${currency.displayName}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="amount">Сумма:</label>
+            <input type="text" autocomplete="off" class="form-control" id="amount" th:field="*{amount}">
+            <p class="alert alert-danger" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}">
+        </div>
+        <p>
+            <input class="btn btn-success" type="submit" value="Submit">
+            <input class="btn btn-primary" type="reset" value="Reset">
+        </p>
+    </form>
+</div>

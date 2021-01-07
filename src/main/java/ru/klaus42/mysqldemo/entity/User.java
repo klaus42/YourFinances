@@ -47,6 +47,6 @@ public class User {
     private UserProfile profile;
 
     @OneToMany(mappedBy="user")
-    private Set<Cash> Cash;
+    private Set<Cash> cash;
 
 }
