@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <div th:replace="fragments/head :: head"></div>
+    <title>Your Finances - User Profile</title>
+</head>
+<body>
+
+<div class="wrap">
+    <div th:replace="fragments/header :: header">
+    </div>
+    <div class="container">
+        <div class="cash" th:if="${purchases!=null}">
+            <h2>Мои покупки</h2>
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center"
+                    th:each="purchase : ${purchases}">
+                    <div>
+                        <span th:id="purchase-+${purchase.id}" th:text="${purchase.name}">Новая покупка</span>
+                        <a data-method="post" href="/purchase/edit" th:href="@{/purchase/edit/}+${purchase.id}">
+                            <span class="material-icons">create</span>
+                        </a>
+                        <a data-method="post" href="/purchase/delete" th:href="@{/purchase/delete/}+${purchase.id}">
+                            <span class="material-icons">delete_outline</span>
+                        </a>
+                    </div>
+                    <span class="badge badge-primary badge-pill"
+                          th:text="${purchase.purchaseDate}">14</span>
+                </li>
+            </ul>
+            <div class="purchase-form" th:replace="user/fragments/purchaseform :: purchaseform"></div>
+        </div>
+
+    </div>
+</div>
+<div th:replace="fragments/footer :: footer">&copy; 2016 The Static Templates</div>
+<!--<script th:src="@{~/webjars/jquery/3.5.1/jquery.min.js}"></script>-->
+<script th:src="@{~/webjars/bootstrap/4.5.3/js/bootstrap.min.js}"></script>
+</body>
+</html>

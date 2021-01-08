@@ -22,10 +22,16 @@
                 <li class="list-group-item d-flex justify-content-between align-items-center"
                     th:each="cash : ${cashList}">
                     <div>
-                        <span th:text="${cash.name}">Новый кошелек</span>
-                        <a data-method="post" href="/cash/delete" th:href="@{/cash/delete/}+${cash.id}">
+                        <span th:id="cashname-+${cash.id}" th:text="${cash.name}">Новый кошелек</span>
+                        <a data-method="post" do="edit" href="/cash/edit" th:href="@{/cash/edit/}+${cash.id}">
+                            <span class="material-icons">create</span>
+                        </a>
+                        <a th:if="${cash.status!=cash.STATUS_DELETED}" data-method="post" do="delete" href="/cash/delete" th:href="@{/cash/delete/}+${cash.id}">
                             <span class="material-icons">delete_outline</span>
                         </a>
+                        <span th:if="${cash.status==cash.STATUS_DELETED}">Удалено</span>
+                        <span th:if="${cash.status==cash.STATUS_DISABLED}">Деактивировано</span>
+
                     </div>
                     <span class="badge badge-primary badge-pill"
                           th:text="${cash.amount} +' ' + ${cash.currency.name}">14</span>
@@ -42,7 +48,16 @@
         var header = $("meta[name='_csrf_header']").attr("content");
 
         $("a[data-method='post']").bind('click', function(e) {
-           e.preventDefault();
+            e.preventDefault();
+            var do_action = e.currentTarget.getAttribute('do');
+            if (do_action=='delete'){
+                if (confirm('Are you sure you want to delete this item?')) {
+                      console.log('Thing was saved to the database.');
+                } else {
+                      // Do nothing!
+                      return;
+                }
+            }
             $.ajax({
                 type: "POST",
                 url: e.currentTarget.getAttribute('href'),
@@ -53,7 +68,44 @@
                     xhr.setRequestHeader(header, token);
                 },
                 success: function (response) {
-                   alert(response.d);
+                    var do_action = e.currentTarget.getAttribute('do');
+                    var cashNameElement = $('#cashname-'+response.id);
+                    if (do_action=='edit'){
+                        var input = $('<input />', {
+                            'type': 'text',
+                            'name': 'cashName',
+                            'style': 'display:inline-block; width: '+(cashNameElement.width()+30)+'px',
+                            'class': 'form-control',
+                            'value': cashNameElement.text(),
+                            'id': 'cashname-'+ response.id,
+                            'cashid': response.id
+                        });
+
+                        $('#cashname-'+response.id).replaceWith(input);
+                        input.focus();
+
+                        input.focusout(function(){
+                                $.ajax({
+                                    type: "POST",
+                                    url: '/cash/update/',
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "text",
+                                    data: JSON.stringify({name: input.val(),id: input.attr('cashid')}),
+                                    beforeSend: function(xhr) {
+                                        // here it is
+                                        xhr.setRequestHeader(header, token);
+                                    },
+                                    success: function (response) {
+
+                                    },
+                                    error: function (error) {
+                                        alert();
+                                    }
+                                });
+                                $(this).replaceWith('<span id="'+input.attr('id')+'">'+input.val()+'</span>');
+                        });
+                    }
+                  // alert(response.id+' '+e.currentTarget.getAttribute('do'));
                 },
                 error: function (error) {
                   alert();

@@ -1,5 +1,9 @@
 package ru.klaus42.mysqldemo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,7 +32,8 @@ public class Currency {
     private String country;
     private String comment;
 
-    @OneToMany(mappedBy = "currency")
+    @OneToMany(mappedBy = "currency",fetch = FetchType.LAZY)
+    @JsonBackReference
     private Set<Cash> cash;
 
 

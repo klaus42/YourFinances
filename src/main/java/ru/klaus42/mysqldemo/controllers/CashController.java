@@ -5,8 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 import ru.klaus42.mysqldemo.entity.Cash;
 import ru.klaus42.mysqldemo.entity.Currency;
 import ru.klaus42.mysqldemo.entity.User;
@@ -63,7 +62,7 @@ public class CashController {
 
         Currency currency = currencyRepository.findByNameOrderByDisplayNameAsc(cash.getCurrency().getName());
 
-        if (currency==null || (null != errors && errors.getErrorCount() > 0)) {
+        if (currency == null || (null != errors && errors.getErrorCount() > 0)) {
             model.addAttribute(user);
             model.addAttribute("cashList", user.getCash());
             return "user/userprofile";
@@ -75,7 +74,22 @@ public class CashController {
         }
     }
 
+    @RequestMapping(path = "/cash/edit/{id}", produces = "application/json")
+    public @ResponseBody Cash editCash(@PathVariable Long id, Model model, Authentication authentication) {
+        User user = userRepository.findByUsername(authentication.getName());
+        List<Cash> cashList = user.getCash();
 
+        Cash newCash = cashRepository.findById(id).orElse(null);
+
+//        List<Currency> currencyList = currencyRepository.findAllByOrderByDisplayNameAsc();
+//        List<Currency> currencyList = new ArrayList<>();
+//        currencyList.add(newCash.getCurrency());
+
+        if (user == null) return null;
+
+
+        return newCash;
+    }
 
 
 }

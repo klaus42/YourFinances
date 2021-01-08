@@ -10,4 +10,6 @@ public interface CurrencyRepository extends JpaRepository<Currency,String> {
     List<Currency> findAllByOrderByDisplayNameAsc();
     List<Currency> findTop15ByOrderByDisplayNameAsc();
     List<Currency> findByDisplayNameContaining(String name);
+
+    Currency findByName(String name);
 }

@@ -2,6 +2,7 @@ package ru.klaus42.mysqldemo.entity;
 
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -48,6 +49,10 @@ public class User {
     private UserProfile profile;
 
     @OneToMany(mappedBy="user")
+    @JsonBackReference
     private List<Cash> cash;
+
+    @OneToMany(mappedBy="user")
+    private List<Purchase> purchases;
 
 }
