@@ -19,9 +19,10 @@ public class PurchaseItem {
 
     private String name = "Новая часть покупки";
 
-    private Integer price;
+    private Float price;
 
-    private Short count;
+
+    private Short quantity;
 
 
     @ManyToOne

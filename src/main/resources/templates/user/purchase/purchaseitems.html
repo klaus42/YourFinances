@@ -1,0 +1,116 @@
+<!DOCTYPE HTML>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <div th:replace="fragments/head :: head"></div>
+    <title>Your Finances - покупка th:text="${purchase.name}"</title>
+</head>
+<body>
+
+<div class="wrap">
+    <div th:replace="fragments/header :: header">
+    </div>
+    <div class="container">
+        <h3>Покупка <span th:text="${purchase.name}"></span></h3>
+
+        <div class="cash" th:if="${purchaseItems!=null}">
+            <h2>Элементы покупки</h2>
+
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center"
+                    th:each="purchaseitem : ${purchaseItems}">
+                    <div>
+                        <span th:id="purchaseitem-+${purchaseitem.id}" th:text="${purchaseitem.name} +', ' + ${purchaseitem.price} + ' '+ ${purchase.currency.name}+' - '+ ${purchaseitem.quantity} + ' шт'">Новый кошелек</span>
+                        <a data-method="post" do="edit" th:href="@{/purchase/}+${purchase.id}+@{/edititem/}+${purchaseitem.id}">
+                            <span class="material-icons">create</span>
+                        </a>
+
+                    </div>
+                    <span class="badge badge-primary badge-pill"
+                          th:text="${purchaseitem.price}*${purchaseitem.quantity} +' ' + ${purchase.currency.name}">14</span>
+                </li>
+            </ul>
+            <div>Всего <span th:text="${total}"></span></div>
+            <div class="purchaseitem-form" th:replace="user/fragments/purchaseitemform :: purchaseitemform"></div>
+
+        </div>
+
+    </div>
+</div>
+<script>
+    $(document).ready(function(){
+        var token = $("meta[name='_csrf']").attr("content");
+        var header = $("meta[name='_csrf_header']").attr("content");
+
+        $("a[data-method='post']").bind('click', function(e) {
+            e.preventDefault();
+            var do_action = e.currentTarget.getAttribute('do');
+            if (do_action=='delete'){
+                if (confirm('Are you sure you want to delete this item?')) {
+                      console.log('Thing was saved to the database.');
+                } else {
+                      // Do nothing!
+                      return;
+                }
+            }
+            $.ajax({
+                type: "POST",
+                url: e.currentTarget.getAttribute('href'),
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                beforeSend: function(xhr) {
+                    // here it is
+                    xhr.setRequestHeader(header, token);
+                },
+                success: function (response) {
+                    var do_action = e.currentTarget.getAttribute('do');
+                    var cashNameElement = $('#cashname-'+response.id);
+                    if (do_action=='edit'){
+                        var input = $('<input />', {
+                            'type': 'text',
+                            'name': 'cashName',
+                            'style': 'display:inline-block; width: '+(cashNameElement.width()+30)+'px',
+                            'class': 'form-control',
+                            'value': cashNameElement.text(),
+                            'id': 'cashname-'+ response.id,
+                            'cashid': response.id
+                        });
+
+                        $('#cashname-'+response.id).replaceWith(input);
+                        input.focus();
+
+                        input.focusout(function(){
+                                $.ajax({
+                                    type: "POST",
+                                    url: '/cash/update/',
+                                    contentType: "application/json; charset=utf-8",
+                                    dataType: "text",
+                                    data: JSON.stringify({name: input.val(),id: input.attr('cashid')}),
+                                    beforeSend: function(xhr) {
+                                        // here it is
+                                        xhr.setRequestHeader(header, token);
+                                    },
+                                    success: function (response) {
+
+                                    },
+                                    error: function (error) {
+                                        alert();
+                                    }
+                                });
+                                $(this).replaceWith('<span id="'+input.attr('id')+'">'+input.val()+'</span>');
+                        });
+                    }
+                  // alert(response.id+' '+e.currentTarget.getAttribute('do'));
+                },
+                error: function (error) {
+                  alert();
+                }
+            });
+        })
+    })
+
+</script>
+<div th:replace="fragments/footer :: footer">&copy; 2016 The Static Templates</div>
+<!--<script th:src="@{~/webjars/jquery/3.5.1/jquery.min.js}"></script>-->
+<script th:src="@{~/webjars/bootstrap/4.5.3/js/bootstrap.min.js}"></script>
+</body>
+</html>
