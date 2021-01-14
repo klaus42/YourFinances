@@ -2,7 +2,7 @@
 <html xmlns:th="https://www.thymeleaf.org">
 <head>
     <div th:replace="fragments/head :: head"></div>
-    <title>Your Finances - User Profile</title>
+    <title>Your Finances - User Purchases</title>
 </head>
 <body>
 
@@ -16,7 +16,9 @@
                 <li class="list-group-item d-flex justify-content-between align-items-center"
                     th:each="purchase : ${purchases}">
                     <div>
-                        <span th:id="purchase-+${purchase.id}" th:text="${purchase.name}">Новая покупка</span>
+                        <a href="/purchase/view" th:href="@{/user/purchase/}+${purchase.id}+@{/items}">
+                            <span th:id="purchase-+${purchase.id}" th:text="${purchase.name}">Новая покупка</span>
+                        </a>
                         <a data-method="post" href="/purchase/edit" th:href="@{/purchase/edit/}+${purchase.id}">
                             <span class="material-icons">create</span>
                         </a>

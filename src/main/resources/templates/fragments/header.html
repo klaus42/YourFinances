@@ -29,14 +29,26 @@
                         <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Sign in
                     </a>
                 </li>
-                <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
-                    <a class="nav-link" href="/logout" th:href="@{#}" onclick="$('#form').submit();">
-                        <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>Logout (<span th:text="${#authentication.getPrincipal().getUsername()}"></span>)
-
-                    </a>
-                    <form style="visibility: hidden" id="form" method="post" action="#"
-                          th:action="@{/logout}"></form>
-                </li>
+                <th:block th:if="${#authorization.expression('isAuthenticated()')}">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user/purchase" th:href="@{/user/purchase/}">
+                            <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Мои покупки
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user" th:href="@{/user}">
+                            <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Мой профиль
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout" th:href="@{#}" onclick="$('#form').submit();">
+                            <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>Logout (<span
+                                th:text="${#authentication.getPrincipal().getUsername()}"></span>)
+                        </a>
+                        <form style="visibility: hidden" id="form" method="post" action="#"
+                              th:action="@{/logout}"></form>
+                    </li>
+                </th:block>
             </ul>
         </div>
     </div>
