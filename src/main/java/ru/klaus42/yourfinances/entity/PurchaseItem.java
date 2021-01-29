@@ -1,5 +1,9 @@
 package ru.klaus42.yourfinances.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,6 +15,8 @@ import javax.persistence.*;
 @Setter
 @Table
 @NoArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+//@JsonIdentityReference(alwaysAsId = true)
 public class PurchaseItem {
 
     @Id
@@ -27,5 +33,6 @@ public class PurchaseItem {
 
     @ManyToOne
     @JoinColumn(name = "purchase_id", nullable = false)
+    @JsonBackReference
     Purchase purchase;
 }

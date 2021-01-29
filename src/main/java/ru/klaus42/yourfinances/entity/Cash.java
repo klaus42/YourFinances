@@ -1,7 +1,6 @@
 package ru.klaus42.yourfinances.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,6 +13,8 @@ import javax.persistence.*;
 @Setter
 @Entity
 @Table
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@JsonIdentityReference(alwaysAsId = true)
 public class Cash {
 
     //Вынести в emun
@@ -30,7 +31,7 @@ public class Cash {
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "currency", nullable = false)
-    @JsonManagedReference
+    //@JsonManagedReference
     private Currency currency;
 
     private Integer amount = 0;
@@ -39,6 +40,6 @@ public class Cash {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference
+//    @JsonBackReference
     private User user;
 }

@@ -3,6 +3,9 @@ package ru.klaus42.yourfinances.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +22,10 @@ import java.util.List;
 @Entity
 @Table
 //@org.springframework.data.relational.core.mapping.Table
+
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@JsonIdentityReference(alwaysAsId = true)
+
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -48,7 +55,7 @@ public class User {
     private UserProfile profile;
 
     @OneToMany(mappedBy="user")
-    @JsonBackReference
+    //@JsonBackReference
     private List<Cash> cash;
 
     @OneToMany(mappedBy="user")
