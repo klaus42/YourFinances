@@ -15,38 +15,44 @@ new Vue({
       ));
   },
   methods: {
-          savePurchase: function (e) {
+          savePurchase: function (idx) {
               axios
-                      .post('/user/purchase', this.purchases[e])
-                      .then(response => {
-                          this.purchases[e] = response.data;
-                          this.editMode = false;
+                   .post('/user/purchase', this.purchases[idx])
+                   .then(response => {
+                       this.purchases[idx] = response.data;
+                       this.editMode = false;
 //                          console.log(response.data);
-                      })
-                      .catch(exception => {
-                          console.log(exception.response)
-                      })
+                   })
+                   .catch(exception => {
+                       console.log(exception.response)
+                   })
 
           },
           deletePurchase: function (id,idx) {
-                        axios
-                                .delete('/user/purchase',  { params: { id: id } })
-                                .then(response => {
-                                    this.purchases.splice(idx, 1);
-                                    this.editMode = false;
+              axios
+                   .delete('/user/purchase',  { params: { id: id } })
+                   .then(response => {
+                       this.purchases.splice(idx, 1);
+                       this.editMode = false;
           //                          console.log(response.data);
-                                })
-                                .catch(exception => {
-                                    console.log(exception.response)
-                                })
-
-                    }
+                   })
+                   .catch(exception => {
+                       console.log(exception.response)
+                   })
+          },
+          resetPurchases: function(){
+            axios
+                .get('/user/purchases')
+                .then(response => {
+                  this.purchases = response.data;
+                  this.editMode = false
+                });
+          }
 
       },
 });
 var token = $("meta[name='_csrf']").attr("content");
 var header = $("meta[name='_csrf_header']").attr("content");
-
 
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
@@ -55,8 +61,6 @@ axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
  * all outgoing HTTP requests automatically have it attached. This is just
  * a simple convenience so we don't have to attach every token manually.
  */
-
-//let token = document.head.querySelector('meta[name="csrf-token"]');
 
 if (token) {
     axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
