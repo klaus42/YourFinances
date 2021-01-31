@@ -76,11 +76,7 @@ public class CashController {
 
         Cash newCash = cashRepository.findById(id).orElse(null);
 
-        System.out.println(newCash.getName());
-
-//        List<Currency> currencyList = currencyRepository.findAllByOrderByDisplayNameAsc();
-//        List<Currency> currencyList = new ArrayList<>();
-//        currencyList.add(newCash.getCurrency());
+//        System.out.println(newCash.getName());
 
         if (user == null) return null;
 

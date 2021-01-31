@@ -21,8 +21,6 @@ import java.util.List;
 @Setter
 @Entity
 @Table
-//@org.springframework.data.relational.core.mapping.Table
-
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 @JsonIdentityReference(alwaysAsId = true)
 
