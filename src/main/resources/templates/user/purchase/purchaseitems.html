@@ -2,7 +2,7 @@
 <html xmlns:th="https://www.thymeleaf.org">
 <head>
     <div th:replace="fragments/head :: head"></div>
-    <title>Your Finances - покупка <th:text="${purchase.name}"></th:text></title>
+    <title th:text="'Your Finances - покупка '+${purchase.name}"></title>
 </head>
 <body>
 
@@ -12,27 +12,97 @@
     <div class="container">
         <h3>Покупка <span th:text="${purchase.name}"></span></h3>
 
-        <div class="cash" th:if="${purchaseItems!=null}">
+        <div class="purchase-items-list" th:if="${purchaseItems!=null}">
             <h2>Элементы покупки</h2>
+
+            <div id="purchase-items-list" class="list-group">
+                <div v-for="(purchaseItem,index) in purchaseItems"
+                     class="list-group-item d-flex justify-content-between align-items-center">
+                    <span v-if="editMode==false || currentId!=purchaseItem.id">
+                        {{ purchaseItem.name }}
+                        <span class="material-icons cursor-pointer" @click="editMode=true; currentId=purchaseItem.id">
+                        create
+                        </span>
+                    </span>
+
+                    <div class="form-row" v-if="editMode==true && currentId==purchaseItem.id">
+                        <div class="col-md-6 form-group">
+                            <input type="text" v-model="purchaseItem.name" class="form-control">
+                        </div>
+                        <div class="input-group col-md-2 form-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" th:text="${purchase.currency.name}">$</span>
+                            </div>
+                            <input type="text" v-model="purchaseItem.price" class="form-control">
+                        </div>
+                        <div class="input-group col-lg-4 form-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">000</span>
+                            </div>
+                            <input type="text" v-model="purchaseItem.quantity" aria-describedby="basic-addon2"
+                                   class="form-control">
+                            <div class="input-group-append">
+                                <button class="btn btn btn-primary" type="button"
+                                        @click="savePurchaseItem(index)">
+                                    <span class="material-icons">done</span>
+                                </button>
+                                <button class="btn btn-secondary" type="button"
+                                        @click="resetPurchaseItems()">
+                                    <span class="material-icons">close</span>
+                                </button>
+                                <button class="btn btn btn-danger" type="button"
+                                        @click="deletePurchaseItem(purchaseItem.id,index)">
+                                    <span class="material-icons">delete_outline</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <ul class="list-group">
                 <li class="list-group-item d-flex justify-content-between align-items-center"
                     th:each="purchaseitem : ${purchaseItems}">
                     <div>
-                        <span th:id="purchaseitem-+${purchaseitem.id}" th:text="${purchaseitem.name} +', ' + ${purchaseitem.price} + ' '+ ${purchase.currency.name}+' - '+ ${purchaseitem.quantity} + ' шт'">Новый кошелек</span>
-                        <a data-method="post" do="edit" th:href="@{/purchase/}+${purchase.id}+@{/edititem/}+${purchaseitem.id}">
+                        <span th:id="purchaseitem-+${purchaseitem.id}"
+                              th:text="${purchaseitem.name} +', ' + ${purchaseitem.price} + ' '+ ${purchase.currency.name}+' - '+ ${purchaseitem.quantity} + ' шт'">Новый кошелек</span>
+                        <a data-method="post" do="edit"
+                           th:href="@{/purchase/}+${purchase.id}+@{/edititem/}+${purchaseitem.id}">
                             <span class="material-icons">create</span>
                         </a>
 
                     </div>
                     <span class="badge badge-primary badge-pill"
-                          th:text="${purchaseitem.price}*${purchaseitem.quantity} +' ' + ${purchase.currency.name}">14</span>
+                          th:text="${purchaseitem.summaryPrice} +' ' + ${purchase.currency.name}">14</span>
                 </li>
             </ul>
-            <div>Всего <span th:text="${total}"></span></div>
+            <h4>Сумма покупки: <span th:text="${total} + ' ' +${purchase.currency.name}"></span></h4>
+
+            <h4>Списать покупку со счета:</h4>
+            <form id="transaction-form" th:object="${transaction}" th:if="${transaction.amount>0}"
+                  th:action="@{/user/purchase/}+ ${purchase.id} +@{/addtransaction}">
+                <div class="form-row">
+                    <div class="col-3">
+                        <input autocomplete="off" type="text" class="form-control" id="amount" th:field="*{amount}"/>
+                    </div>
+                    <div class="col">
+                        <select id="cash_id" th:field="*{cash}" class="form-control">
+                            <option th:each="cash : ${purchase.user.cash}" th:value="${cash.id}"
+                                    th:text="${cash.name}+': '+ ${cash.amount} + ' '+ ${cash.currency.name}"
+                                    th:if="${(cash.currency == purchase.currency) && (cash.amount > total) }"/>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-success" type="submit">
+                            <span class="material-icons">done</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
             <div class="purchaseitem-form" th:replace="user/fragments/purchaseitemform :: purchaseitemform"></div>
 
         </div>
+        <script src="/src/js/purchaseItem.js" type="text/javascript"></script>
 
     </div>
 </div>
@@ -107,6 +177,26 @@
             });
         })
     })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </script>
 <div th:replace="fragments/footer :: footer">&copy; 2016 The Static Templates</div>
