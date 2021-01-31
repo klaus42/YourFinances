@@ -13,7 +13,6 @@ import javax.persistence.*;
 @Setter
 @Entity
 @Table
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 //@JsonIdentityReference(alwaysAsId = true)
 public class Cash {
 

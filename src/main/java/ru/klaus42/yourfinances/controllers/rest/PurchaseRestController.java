@@ -5,6 +5,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import ru.klaus42.yourfinances.entity.Purchase;
+import ru.klaus42.yourfinances.entity.PurchaseTransaction;
 import ru.klaus42.yourfinances.entity.User;
 import ru.klaus42.yourfinances.repository.PurchaseRepository;
 import ru.klaus42.yourfinances.repository.UserRepository;
@@ -32,6 +33,12 @@ public class PurchaseRestController {
     @GetMapping("/user/purchases")
     public List<Purchase> geUserPurchases(Principal principal) {
         return purchaseRepository.findAllByUserId(this.getUserByAuth(principal).getId());
+    }
+
+    @GetMapping("/user/purchase/{id}")
+    public Purchase getUserPurchaseById(@PathVariable Long id, Principal principal) {
+        Purchase purchase =  purchaseRepository.findById(id).orElse(null);
+        return purchase;
     }
 
     //Обновляем покупку

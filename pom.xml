@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>ru.klaus42</groupId>
-    <artifactId>mysqldemo</artifactId>
+    <artifactId>yourfinances</artifactId>
     <version>0.0.1</version>
-    <name>mysqldemo</name>
-    <description>Mysql connect project for Spring Boot</description>
+    <name>Your Finances Application</name>
+    <description>Your Finances Application on Spring Boot</description>
 
     <properties>
         <java.version>11</java.version>

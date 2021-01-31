@@ -38,7 +38,7 @@ public class Purchase {
 
     @OneToMany(mappedBy="purchase",cascade = CascadeType.ALL)
     //@JsonBackReference
-    @JsonBackReference
+    @JsonBackReference(value = "purchaseitems")
     private List<PurchaseItem> purchaseItems;
 
     @ManyToOne
@@ -46,5 +46,9 @@ public class Purchase {
     //@JsonManagedReference(value = "currency")
     private Currency currency;
 
+    @OneToMany(mappedBy="purchase")
+    //@JsonBackReference
+    @JsonBackReference
+    private List<PurchaseTransaction> purchaseTransactions;
 
 }

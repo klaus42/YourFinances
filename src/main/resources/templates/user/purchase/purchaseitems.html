@@ -14,17 +14,20 @@
 
         <div class="purchase-items-list" th:if="${purchaseItems!=null}">
             <h2>Элементы покупки</h2>
-
             <div id="purchase-items-list" class="list-group">
                 <div v-for="(purchaseItem,index) in purchaseItems"
                      class="list-group-item d-flex justify-content-between align-items-center">
                     <span v-if="editMode==false || currentId!=purchaseItem.id">
-                        {{ purchaseItem.name }}
+                        {{ purchaseItem.name }}: {{purchaseItem.quantity}} x {{purchaseItem.price}} <span
+                            th:text="${purchase.currency.name}">$</span>
                         <span class="material-icons cursor-pointer" @click="editMode=true; currentId=purchaseItem.id">
                         create
                         </span>
                     </span>
-
+                    <span class="badge badge-primary badge-pill"
+                          v-if="editMode==false || currentId!=purchaseItem.id">
+                        {{purchaseItem.summaryPrice}} <span th:text="${purchase.currency.name}">$</span>
+                    </span>
                     <div class="form-row" v-if="editMode==true && currentId==purchaseItem.id">
                         <div class="col-md-6 form-group">
                             <input type="text" v-model="purchaseItem.name" class="form-control">
@@ -50,7 +53,7 @@
                                         @click="resetPurchaseItems()">
                                     <span class="material-icons">close</span>
                                 </button>
-                                <button class="btn btn btn-danger" type="button"
+                                <button class="btn btn-danger" type="button"
                                         @click="deletePurchaseItem(purchaseItem.id,index)">
                                     <span class="material-icons">delete_outline</span>
                                 </button>
@@ -58,51 +61,99 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between align-items-center"
-                    th:each="purchaseitem : ${purchaseItems}">
-                    <div>
-                        <span th:id="purchaseitem-+${purchaseitem.id}"
-                              th:text="${purchaseitem.name} +', ' + ${purchaseitem.price} + ' '+ ${purchase.currency.name}+' - '+ ${purchaseitem.quantity} + ' шт'">Новый кошелек</span>
-                        <a data-method="post" do="edit"
-                           th:href="@{/purchase/}+${purchase.id}+@{/edititem/}+${purchaseitem.id}">
-                            <span class="material-icons">create</span>
-                        </a>
 
-                    </div>
-                    <span class="badge badge-primary badge-pill"
-                          th:text="${purchaseitem.summaryPrice} +' ' + ${purchase.currency.name}">14</span>
-                </li>
-            </ul>
-            <h4>Сумма покупки: <span th:text="${total} + ' ' +${purchase.currency.name}"></span></h4>
+                <!--            <ul class="list-group">-->
+                <!--                <li class="list-group-item d-flex justify-content-between align-items-center"-->
+                <!--                    th:each="purchaseitem : ${purchaseItems}">-->
+                <!--                    <div>-->
+                <!--                        <span th:id="purchaseitem-+${purchaseitem.id}"-->
+                <!--                              th:text="${purchaseitem.name} +', ' + ${purchaseitem.price} + ' '+ ${purchase.currency.name}+' - '+ ${purchaseitem.quantity} + ' шт'">Новый кошелек</span>-->
+                <!--                        <a data-method="post" do="edit"-->
+                <!--                           th:href="@{/purchase/}+${purchase.id}+@{/edititem/}+${purchaseitem.id}">-->
+                <!--                            <span class="material-icons">create</span>-->
+                <!--                        </a>-->
 
-            <h4>Списать покупку со счета:</h4>
-            <form id="transaction-form" th:object="${transaction}" th:if="${transaction.amount>0}"
-                  th:action="@{/user/purchase/}+ ${purchase.id} +@{/addtransaction}">
-                <div class="form-row">
-                    <div class="col-3">
-                        <input autocomplete="off" type="text" class="form-control" id="amount" th:field="*{amount}"/>
+                <!--                    </div>-->
+                <!--                    <span class="badge badge-primary badge-pill"-->
+                <!--                          th:text="${purchaseitem.summaryPrice} +' ' + ${purchase.currency.name}">14</span>-->
+                <!--                </li>-->
+                <!--            </ul>-->
+                <h4>Сумма покупки: <span v-if="purchase">{{totalPrice}} {{purchase.currency.name}}</span></h4>
+
+
+                <div id="purchase-transactions">
+                    <div class="alert alert-primary" role="alert"  v-if="total==0">
+                        Покупка полностью оплачена
                     </div>
-                    <div class="col">
-                        <select id="cash_id" th:field="*{cash}" class="form-control">
-                            <option th:each="cash : ${purchase.user.cash}" th:value="${cash.id}"
-                                    th:text="${cash.name}+': '+ ${cash.amount} + ' '+ ${cash.currency.name}"
-                                    th:if="${(cash.currency == purchase.currency) && (cash.amount > total) }"/>
-                        </select>
+                    <div class="alert alert-warning" role="alert"  v-if="total<0">
+                        Списано со счетов больше, чем сумма покупки
                     </div>
-                    <div class="col-auto">
-                        <button class="btn btn-success" type="submit">
-                            <span class="material-icons">done</span>
-                        </button>
+                    <div v-if="transactions!=null && transactions.length " class="list-transactions">
+                        <h4>Списания со счетов</h4>
+                        <div v-for="(transaction,index) in transactions">
+                            <span>{{transaction.cash.name}}: {{transaction.amount}} {{transaction.cash.currency.name}}</span>
+                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                    @click="deleteTransaction(transaction.id,index)">
+                                <span class="material-icons">delete_outline</span>
+                            </button>
+                        </div>
                     </div>
+                    <form id="transaction-vue-form" v-if="total!=0 && cashList!=null && cashList.length"
+                          th:action="@{/user/purchase/}+ ${purchase.id} +@{/addtransaction}" method="post">
+                        <h4>Списать покупку со счета:</h4>
+                        <div class="form-row">
+                            <div class="col-3">
+                                <input autocomplete="off" type="text" class="form-control" name="amount"
+                                       v-model="total"/>
+                            </div>
+
+                            <div class="col">
+                                <select name="cash" class="form-control">
+                                    <option v-for="(cash,index) in cashList" :value="cash.id"
+                                            v-if="cash.currency.name == purchase.currency.name">
+                                        {{cash.name}}: {{cash.amount}} {{cash.currency.name}}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-success" type="submit">
+                                    <span class="material-icons">done</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+
+<!--                    <form id="transaction-form" th:object="${transaction}" th:if="${transaction.amount>0}"-->
+<!--                          th:action="@{/user/purchase/}+ ${purchase.id} +@{/addtransaction}" method="post">-->
+<!--                        <h4>Списать покупку со счета:</h4>-->
+<!--                        <div class="form-row">-->
+<!--                            <div class="col-3">-->
+<!--                                <input autocomplete="off" type="text" class="form-control" id="amount"-->
+<!--                                       th:field="*{amount}"/>-->
+<!--                            </div>-->
+<!--                            <div class="col">-->
+<!--                                <select id="cash_id" th:field="*{cash}" class="form-control">-->
+<!--                                    <option th:each="cash : ${purchase.user.cash}" th:value="${cash.id}"-->
+<!--                                            th:text="${cash.name}+': '+ ${cash.amount} + ' '+ ${cash.currency.name}"-->
+<!--                                            th:if="${(cash.currency == purchase.currency) && (cash.amount > total) }"/>-->
+<!--                                </select>-->
+<!--                            </div>-->
+<!--                            <div class="col-auto">-->
+<!--                                <button class="btn btn-success" type="submit">-->
+<!--                                    <span class="material-icons">done</span>-->
+<!--                                </button>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </form>-->
                 </div>
-            </form>
+            </div>
             <div class="purchaseitem-form" th:replace="user/fragments/purchaseitemform :: purchaseitemform"></div>
 
         </div>
         <script src="/src/js/purchaseItem.js" type="text/javascript"></script>
+
 
     </div>
 </div>
@@ -177,6 +228,15 @@
             });
         })
     })
+
+
+
+
+
+
+
+
+
 
 
 

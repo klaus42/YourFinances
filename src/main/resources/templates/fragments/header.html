@@ -32,6 +32,11 @@
                 </li>
                 <th:block th:if="${#authorization.expression('isAuthenticated()')}">
                     <li class="nav-item">
+                        <a class="nav-link" href="/user/purchase" th:href="@{/user/cash/}">
+                            <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Мои счета
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="/user/purchase" th:href="@{/user/purchase/}">
                             <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>Мои покупки
                         </a>

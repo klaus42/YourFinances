@@ -1,6 +1,7 @@
 package ru.klaus42.yourfinances.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,6 +36,9 @@ public class PurchaseController {
 
     @Autowired
     private PurchaseTransactionRepository purchaseTransactionRepository;
+
+    @Autowired
+    CashRepository cashRepository;
 
 
     @GetMapping
@@ -145,26 +149,36 @@ public class PurchaseController {
     @PostMapping("/{id}/addtransaction")
     public String addTransaction(@Valid PurchaseTransaction purchaseTransaction, Errors errors, @PathVariable("id") Long id, Model model, Authentication authentication) {
 
-        if (null != errors && errors.getErrorCount() > 0) {
+        User user = userRepository.findByUsername(authentication.getName());
 
-            Purchase purchase = purchaseRepository.findById(id).get();
-            Float total = purchaseItemRepository.total(purchase.getId());
-            Float totalToPay = calculateSumToPay(purchase.getId());
+        if (user == null) return "redirect:/user/purchase/" + id + "/items";
+
+        Purchase purchase = purchaseRepository.findById(id).get();
+        Float total = purchaseItemRepository.total(purchase.getId());
+        Float totalToPay = calculateSumToPay(purchase.getId());
+
+        if (null != errors && errors.getErrorCount() > 0) {
 
             model.addAttribute("purchaseItems", purchase.getPurchaseItems());
             model.addAttribute("purchase", purchase);
             model.addAttribute("total", total);
 
-
             return "user/purchase/purchaseItems";
         }
-        User user = userRepository.findByUsername(authentication.getName());
 
-        if (user == null) return "user/purchase/purchase";
+        purchaseTransaction.setPurchase(purchase);
+        if (purchaseTransaction.getAmount() > totalToPay) {
+            purchaseTransaction.setAmount(totalToPay);
+        }
 
-        purchaseTransaction.setPurchase(purchaseRepository.findById(id).get());
-
-        purchaseTransactionRepository.save(purchaseTransaction);
+        try {
+            purchaseTransactionRepository.save(purchaseTransaction);
+            Cash cash = purchaseTransaction.getCash();
+            cash.setAmount(cash.getAmount() - purchaseTransaction.getAmount());
+            cashRepository.save(cash);
+        } catch (DataAccessException e) {
+            return "redirect:/user/purchase/" + id + "/items";
+        }
 
         return "redirect:/user/purchase/" + id + "/items";
     }

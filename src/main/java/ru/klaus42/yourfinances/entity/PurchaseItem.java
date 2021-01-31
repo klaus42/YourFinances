@@ -16,7 +16,7 @@ import javax.validation.constraints.*;
 @Setter
 @Table
 @NoArgsConstructor
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 //@JsonIdentityReference(alwaysAsId = true)
 public class PurchaseItem {
 
@@ -30,6 +30,8 @@ public class PurchaseItem {
     @NotNull(message = "Укажите цену")
     private Double price;
 
+
+    //Подумать, может нужно сделать дробным числом
     @Digits(integer=10, fraction=0, message = "Количество должно быть целым числом")
     private Short quantity = 1;
 
@@ -42,6 +44,6 @@ public class PurchaseItem {
     Purchase purchase;
 
     public Double getSummaryPrice() {
-        return this.price * this.quantity;
+        return summaryPrice = this.price * this.quantity;
     }
 }

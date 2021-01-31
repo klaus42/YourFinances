@@ -4,7 +4,7 @@ new Vue({
     return {
       purchases : null,
       currentId : -1,
-      editMode  : false
+      editMode  : false,
     };
   },
   mounted() {

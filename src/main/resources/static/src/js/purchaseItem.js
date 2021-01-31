@@ -6,8 +6,44 @@ new Vue({
     return {
       purchaseItems : null,
       currentId : -1,
-      editMode  : false
+      editMode  : false,
+      transactions : null,
+      cashList :null,
+      purchase : null,
+      total : null,
+      totalPayed :null,
+      totalPrice :null
     };
+  },
+  watch: {
+      purchaseItems: {
+      handler(val, oldVal) {
+            console.log('book list changed');
+                var sum = 0;
+                if(this.purchaseItems == null) this.totalPrice = sum;
+                this.purchaseItems.forEach(e => {
+                     sum += e.price*e.quantity;
+                });
+                this.totalPrice = sum;
+                this.total = this.totalPrice - this.totalPayed;
+          },
+          deep: true
+      },
+
+      transactions :{
+          deep: true,
+               // We have to move our method to a handler field
+          handler(){
+             var sum = 0;
+             if(this.transactions == null) this.totalPayed = sum;
+             this.transactions.forEach(e => {
+               sum += e.amount;
+             });
+             this.totalPayed = sum;
+             this.total = this.totalPrice - this.totalPayed;
+
+         }
+      },
   },
   mounted() {
     console.log(baseUrl);
@@ -16,6 +52,24 @@ new Vue({
         .then(response => (
             this.purchaseItems = response.data
         ));
+        axios
+            .get(baseUrl+"/gettransactions")
+            .then(response => (
+                this.transactions = response.data
+            ));
+
+        axios
+            .get("/cash")
+            .then(response => (
+                this.cashList = response.data
+            ));
+        axios
+            .get(baseUrl)
+            .then(response => (
+                this.purchase = response.data
+            ));
+
+//        total = this.totalPrice - this.totalPayed;
   },
   methods: {
           savePurchaseItem: function (idx) {
@@ -23,6 +77,7 @@ new Vue({
                    .post(baseUrl+"/updateitem", this.purchaseItems[idx])
                    .then(response => {
                        this.purchaseItems[idx] = response.data;
+                       this.total = this.totalPrice - this.totalPayed;
                        this.editMode = false;
 //                          console.log(response.data);
                    })
@@ -50,7 +105,24 @@ new Vue({
                   this.purchaseItems = response.data;
                   this.editMode = false
                 });
-          }
+          },
+          deleteTransaction: function (id,idx) {
+                        axios
+                             .delete(baseUrl+"/deletetransaction",  { params: { id: id } })
+                             .then(response => {
+                                 this.transactions.splice(idx, 1);
+                                 axios
+                                      .get("/cash")
+                                      .then(response => (
+                                          this.cashList = response.data
+                                      ));
+          //                       this.editMode = false;
+                    //                          console.log(response.data);
+                             })
+                             .catch(exception => {
+                                 console.log(exception.response)
+                             })
+                    },
 
       },
 });
