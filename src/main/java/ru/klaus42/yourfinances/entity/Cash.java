@@ -14,14 +14,13 @@ import javax.persistence.*;
 @Entity
 @Table
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
-@JsonIdentityReference(alwaysAsId = true)
+//@JsonIdentityReference(alwaysAsId = true)
 public class Cash {
 
     //Вынести в emun
     public static final Short STATUS_ACTIVE = 10;
     public static final Short STATUS_DISABLED = 20;
     public static final Short STATUS_DELETED = 30;
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -34,7 +33,7 @@ public class Cash {
     //@JsonManagedReference
     private Currency currency;
 
-    private Integer amount = 0;
+    private Double amount = 0.0;
 
     private Short status = STATUS_ACTIVE;
 
