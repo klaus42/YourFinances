@@ -4,19 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import ru.klaus42.yourfinances.entity.Currency;
-import ru.klaus42.yourfinances.entity.Purchase;
-import ru.klaus42.yourfinances.entity.PurchaseItem;
-import ru.klaus42.yourfinances.entity.User;
-import ru.klaus42.yourfinances.repository.CurrencyRepository;
-import ru.klaus42.yourfinances.repository.PurchaseItemRepository;
-import ru.klaus42.yourfinances.repository.PurchaseRepository;
-import ru.klaus42.yourfinances.repository.UserRepository;
+import ru.klaus42.yourfinances.entity.*;
+import ru.klaus42.yourfinances.repository.*;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -33,10 +28,13 @@ public class PurchaseController {
     private PurchaseItemRepository purchaseItemRepository;
 
     @Autowired
-    private  UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    private  CurrencyRepository currencyRepository;
+    private CurrencyRepository currencyRepository;
+
+    @Autowired
+    private PurchaseTransactionRepository purchaseTransactionRepository;
 
 
     @GetMapping
@@ -68,6 +66,10 @@ public class PurchaseController {
 
         if (user == null) return "user/purchase/purchase";
 
+        if (errors.hasErrors()) {
+            return "user/purchase/purchase";
+        }
+
         purchase.setUser(user);
 
         purchaseRepository.save(purchase);
@@ -81,25 +83,53 @@ public class PurchaseController {
     }
 
     @GetMapping("/{id}/items")
-    public String getPurchaseItems(@PathVariable("id") Long id,Model model, Authentication authentication) {
+    public String getPurchaseItems(@PathVariable("id") Long id, Model model, Authentication authentication) {
 
         Purchase purchase = purchaseRepository.findById(id).get();
 
-        List<PurchaseItem> purchaseItems =purchase.getPurchaseItems();
+        List<PurchaseItem> purchaseItems = purchase.getPurchaseItems();
 
         PurchaseItem newPurchaseItem = new PurchaseItem();
+
+        Float total = purchaseItemRepository.total(purchase.getId());
+        Float totalToPay = calculateSumToPay(purchase.getId());
+
+        PurchaseTransaction purchaseTransaction = new PurchaseTransaction();
+        purchaseTransaction.setPurchase(purchase);
+        purchaseTransaction.setAmount(totalToPay);
 
         model.addAttribute("purchaseItems", purchaseItems);
         model.addAttribute("purchase", purchase);
         model.addAttribute("purchaseItem", newPurchaseItem);
-        model.addAttribute("total",purchaseItemRepository.total(purchase.getId()));
+        model.addAttribute("transaction", purchaseTransaction);
+
+        model.addAttribute("total", total);
 
 
         return "user/purchase/purchaseitems";
     }
 
     @PostMapping("/{id}/additem")
-    public String addPurchaseItem(@Valid PurchaseItem purchaseItem,@PathVariable("id") Long id, Model model, Authentication authentication, Errors errors) {
+    public String addPurchaseItem(@Valid PurchaseItem purchaseItem, Errors errors, @PathVariable("id") Long id, Model model, Authentication authentication) {
+
+        if (null != errors && errors.getErrorCount() > 0) {
+
+            Purchase purchase = purchaseRepository.findById(id).get();
+            Float total = purchaseItemRepository.total(purchase.getId());
+            Float totalToPay = calculateSumToPay(purchase.getId());
+
+            PurchaseTransaction purchaseTransaction = new PurchaseTransaction();
+            purchaseTransaction.setPurchase(purchase);
+            purchaseTransaction.setAmount(totalToPay);
+
+            model.addAttribute("purchaseItems", purchase.getPurchaseItems());
+            model.addAttribute("purchase", purchase);
+            model.addAttribute("transaction", purchaseTransaction);
+            model.addAttribute("total", total);
+
+
+            return "user/purchase/purchaseItems";
+        }
         User user = userRepository.findByUsername(authentication.getName());
 
         if (user == null) return "user/purchase/purchase";
@@ -108,7 +138,41 @@ public class PurchaseController {
 
         purchaseItemRepository.save(purchaseItem);
 
-        return "redirect:/user/purchase/"+id+"/items";
+        return "redirect:/user/purchase/" + id + "/items";
+    }
+
+
+    @PostMapping("/{id}/addtransaction")
+    public String addTransaction(@Valid PurchaseTransaction purchaseTransaction, Errors errors, @PathVariable("id") Long id, Model model, Authentication authentication) {
+
+        if (null != errors && errors.getErrorCount() > 0) {
+
+            Purchase purchase = purchaseRepository.findById(id).get();
+            Float total = purchaseItemRepository.total(purchase.getId());
+            Float totalToPay = calculateSumToPay(purchase.getId());
+
+            model.addAttribute("purchaseItems", purchase.getPurchaseItems());
+            model.addAttribute("purchase", purchase);
+            model.addAttribute("total", total);
+
+
+            return "user/purchase/purchaseItems";
+        }
+        User user = userRepository.findByUsername(authentication.getName());
+
+        if (user == null) return "user/purchase/purchase";
+
+        purchaseTransaction.setPurchase(purchaseRepository.findById(id).get());
+
+        purchaseTransactionRepository.save(purchaseTransaction);
+
+        return "redirect:/user/purchase/" + id + "/items";
+    }
+
+    private float calculateSumToPay(Long purchaseId) {
+        Float total = purchaseItemRepository.total(purchaseId);
+        Float payed = purchaseTransactionRepository.sumByPurchaseId(purchaseId);
+        return total - payed;
     }
 
 
